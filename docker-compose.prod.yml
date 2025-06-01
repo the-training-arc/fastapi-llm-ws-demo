@@ -1,0 +1,41 @@
+services:
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - healf-fastapi
+    networks:
+      - healf-app-network
+
+  healf-fastapi:
+    build:
+      dockerfile: Dockerfile
+    ports:
+      - "8000:80"
+    volumes:
+      - .:/app
+      - /app/.venv
+    depends_on:
+      - postgres
+    environment:
+      DATABASE_URL: "postgresql://postgres:postgres@postgres:5432/healf_db"
+    networks:
+      - healf-app-network
+
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: healf_db
+    volumes:
+      - "./db/postgres_data:/var/lib/postgresql/data:rw"
+    networks:
+      - healf-app-network
+
+networks:
+  healf-app-network:
+    driver: bridge 
