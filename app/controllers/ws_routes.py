@@ -36,8 +36,12 @@ async def wellness_profile(websocket: WebSocket):
     try:
         while True:
             data = await websocket.receive_text()
-            await llm_usecase.generate_questions_from_llm(data, WellnessProfileIn)
-            await manager.send_personal_message('You wrote', websocket)
+            if not data:
+                continue
+
+            result = llm_usecase.generate_questions_from_llm(data, WellnessProfileIn)
+            result_str = result.model_dump_json()
+            await manager.send_personal_message(result_str, websocket)
 
     except WebSocketDisconnect:
         manager.disconnect(websocket)

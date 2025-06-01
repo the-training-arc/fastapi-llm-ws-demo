@@ -18,6 +18,10 @@ services:
           path: .
           target: /app
         - action: rebuild
+          path: uv.lock
+        - action: rebuild
+          path: pyproject.toml
+        - action: rebuild
           path: Dockerfile
     platform: linux/amd64
     networks:
