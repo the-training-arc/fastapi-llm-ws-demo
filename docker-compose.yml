@@ -13,6 +13,7 @@ services:
       DATABASE_URL: "postgresql://postgres:postgres@postgres:5432/healf_db"
     networks:
       - healf-app-network
+    command: ["/app/.venv/bin/fastapi", "dev", "app/main.py", "--port", "80", "--host", "0.0.0.0"]
     develop:
       watch:
         - action: sync
