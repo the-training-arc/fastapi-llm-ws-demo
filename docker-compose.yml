@@ -9,10 +9,8 @@ services:
       - /app/.venv
     depends_on:
       - postgres
-    environment:
-      DATABASE_URL: "postgresql://postgres:postgres@postgres:5432/healf_db"
-    networks:
-      - healf-app-network
+    env_file:
+      - .env
     command: ["/app/.venv/bin/fastapi", "dev", "app/main.py", "--port", "80", "--host", "0.0.0.0"]
     develop:
       watch:
@@ -21,6 +19,9 @@ services:
           target: /app
         - action: rebuild
           path: Dockerfile
+    platform: linux/amd64
+    networks:
+      - healf-app-network
 
   postgres:
     image: postgres:15
