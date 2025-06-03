@@ -1,29 +1,26 @@
-from typing import Dict, List
-
 from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect
 from pydantic import ValidationError
 from structlog import get_logger
 
 from app.constants.message import MessageEvent
-from app.constants.profiling_stage import ProfilingStage
 from app.models.message import Message
-from app.models.wellness_profile import WellnessProfile, WellnessProfileConfidence
-from app.usecases.session_manager_usecase import ConnectionManager
+from app.repositories.shared_state import (
+    get_connection_manager,
+    session_messages,
+    session_status,
+    session_wellness_confidence,
+    session_wellness_profiles,
+)
 from app.usecases.wellness_assistant_usecase import WellnessAssistantUsecase
 
 ws_routes = APIRouter()
-
-session_messages: Dict[str, List[dict]] = {}
-session_status: Dict[str, ProfilingStage] = {}
-session_wellness_profiles: Dict[str, WellnessProfile] = {}
-session_wellness_confidence: Dict[str, WellnessProfileConfidence] = {}
 
 
 @ws_routes.websocket('/wellness_profile/{session_id}')
 async def wellness_profile(
     websocket: WebSocket,
     session_id: str,
-    manager: ConnectionManager = Depends(lambda: ConnectionManager(session_messages)),
+    manager=Depends(get_connection_manager),
 ):
     logger = get_logger()
     await manager.connect(websocket, session_id)

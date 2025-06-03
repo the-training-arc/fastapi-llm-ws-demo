@@ -34,10 +34,7 @@ class WellnessAssistantUsecase:
     ):
         current_stage = session_status.get(session_id, ProfilingStage.INIT)
 
-        if (
-            message.event == MessageEvent.INIT_PROFILE.value
-            or current_stage == ProfilingStage.INIT
-        ):
+        if message.event == MessageEvent.INIT_PROFILE.value or current_stage == ProfilingStage.INIT:
             response = Message(
                 event=MessageEvent.ASSISTANT_QUESTION,
                 message=WellnessProfileQuestions.INTRODUCTION,

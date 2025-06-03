@@ -5,10 +5,20 @@ from fastapi import WebSocket
 
 
 class ConnectionManager:
-    def __init__(self, session_messages: Dict[str, List[dict]]):
-        self.session_messages = session_messages
-        self.active_connections: list[WebSocket] = []
-        self.connection_sessions: Dict[WebSocket, str] = {}
+    _instance = None
+    _initialized = False
+
+    def __new__(cls, session_messages: Dict[str, List[dict]] = None):
+        if cls._instance is None:
+            cls._instance = super(ConnectionManager, cls).__new__(cls)
+        return cls._instance
+
+    def __init__(self, session_messages: Dict[str, List[dict]] = None):
+        if not self._initialized:
+            self.session_messages = session_messages
+            self.active_connections: list[WebSocket] = []
+            self.connection_sessions: Dict[WebSocket, str] = {}
+            self._initialized = True
 
     async def connect(self, websocket: WebSocket, session_id: str):
         await websocket.accept()
@@ -52,3 +62,11 @@ class ConnectionManager:
 
     def store_message(self, session_id: str, message: dict):
         self.session_messages[session_id].append(message)
+
+    def get_connections_with_session_id(self, session_id: str) -> List[WebSocket]:
+        """Get all connections for a specific session"""
+        return [
+            connection
+            for connection in self.active_connections
+            if self.connection_sessions[connection] == session_id
+        ]
