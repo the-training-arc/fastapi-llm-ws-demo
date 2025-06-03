@@ -1,8 +1,10 @@
-from fastapi import APIRouter
+import asyncio
+
+from fastapi import APIRouter, Depends
 
 from app.constants.message import MessageStatus
-from app.models.message import TransationResponse
-from app.repositories.shared_state import get_connection_manager
+from app.models.message import TransationResponse, UserAnswerInput
+from app.usecases.wellness_assistant_usecase import WellnessUsecase
 
 wellness_profile = APIRouter()
 
@@ -16,30 +18,27 @@ wellness_profile = APIRouter()
     summary='Initialize the wellness profile session',
     tags=['Wellness Profile'],
 )
-async def initialize(session_id: str) -> TransationResponse:
-    manager = get_connection_manager()
-    connections = manager.get_connections_with_session_id(session_id)
-    if not connections:
-        return TransationResponse(
-            status=MessageStatus.ERROR, message='No connection found for session'
-        )
-
-    for connection in connections:
-        await manager.send_personal_message(
-            'Wellness profile session initialized via REST API',
-            connection,
-        )
-
-    return TransationResponse(status=MessageStatus.SUCCESS, message='Wellness profile initialized')
+async def initialize(
+    session_id: str,
+    wellness_usecase: WellnessUsecase = Depends(WellnessUsecase),
+) -> TransationResponse:
+    asyncio.create_task(wellness_usecase.initialize_session(session_id))
+    return TransationResponse(status=MessageStatus.SUCCESS, message='Wellness Profile Initialized')
 
 
 @wellness_profile.post(
-    '/userAnswer',
+    '/userAnswer/{session_id}',
+    response_model=TransationResponse,
+    response_model_exclude_none=True,
+    response_model_exclude_unset=True,
+    description='User answer to the wellness profile question',
+    summary='User answer to the wellness profile question',
+    tags=['Wellness Profile'],
 )
-async def user_answer(session_id: str):
-    return {'message': 'Wellness profile'}
-
-
-@wellness_profile.get('/status')
-async def get_wellness_profile(session_id: str):
-    return {'message': 'Wellness profile'}
+async def user_answer(
+    session_id: str,
+    message: UserAnswerInput,
+    wellness_usecase: WellnessUsecase = Depends(WellnessUsecase),
+) -> TransationResponse:
+    asyncio.create_task(wellness_usecase.send_message_to_assistant(session_id, message))
+    return TransationResponse(status=MessageStatus.SUCCESS, message='User Answer Sent')

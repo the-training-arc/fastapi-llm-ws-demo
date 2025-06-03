@@ -12,16 +12,26 @@ from app.models.wellness_profile import WellnessProfileResponse
 
 
 class LLMUsecase:
-    def __init__(self):
-        self.aws_region = os.environ.get('BEDROCK_REGION')
-        self.sonnet_model_id = os.getenv('SONNET_MODEL_ID')
-        self.haiku_model_id = os.getenv('HAIKU_MODEL_ID')
-        self.max_tokens = os.getenv('MAX_TOKENS') or 4096
+    __slots__ = (
+        '__aws_region',
+        '__sonnet_model_id',
+        '__haiku_model_id',
+        '__max_tokens',
+        '__is_local',
+        '__logging_level',
+        '__logger',
+    )
 
-        self.is_local = os.getenv('IS_LOCAL')  # set to True if testing locally
-        self.logging_level = logging.DEBUG if self.is_local else logging.INFO
-        logging.basicConfig(level=self.logging_level)
-        self.logger = get_logger()
+    def __init__(self):
+        self.__aws_region = os.environ.get('BEDROCK_REGION')
+        self.__sonnet_model_id = os.getenv('SONNET_MODEL_ID')
+        self.__haiku_model_id = os.getenv('HAIKU_MODEL_ID')
+        self.__max_tokens = os.getenv('MAX_TOKENS') or 4096
+
+        self.__is_local = os.getenv('IS_LOCAL')  # set to True if testing locally
+        self.__logging_level = logging.DEBUG if self.__is_local else logging.INFO
+        logging.basicConfig(level=self.__logging_level)
+        self.__logger = get_logger()
 
     def __generate_questions_from_llm(
         self, prompt: str, response_model: BaseModel, powerful_model: bool
@@ -35,19 +45,19 @@ class LLMUsecase:
         """
         disable_pydantic_error_url()  # instructor not include error url in response to save on tokens
 
-        model_id = self.sonnet_model_id if powerful_model else self.haiku_model_id
+        model_id = self.__sonnet_model_id if powerful_model else self.__haiku_model_id
 
-        self.logger.info(
+        self.__logger.info(
             f'Generating questions from LLM with prompt: {prompt}',
             model=model_id,
-            max_tokens=self.max_tokens,
+            max_tokens=self.__max_tokens,
         )
 
-        model = AnthropicBedrock(aws_region=self.aws_region)
+        model = AnthropicBedrock(aws_region=self.__aws_region)
         client = instructor.from_anthropic(model, mode=instructor.Mode.ANTHROPIC_TOOLS)
         resp, _ = client.chat.completions.create_with_completion(
             model=model_id,
-            max_tokens=self.max_tokens,
+            max_tokens=self.__max_tokens,
             messages=[
                 {'role': 'user', 'content': prompt},
             ],

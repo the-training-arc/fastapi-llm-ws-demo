@@ -7,6 +7,7 @@ session_messages: Dict[str, List[dict]] = {}
 session_status: Dict[str, ProfilingStage] = {}
 session_wellness_profiles: Dict[str, WellnessProfile] = {}
 session_wellness_confidence: Dict[str, WellnessProfileConfidence] = {}
+session_assistant_replies: Dict[str, int] = {}
 
 
 def get_connection_manager():

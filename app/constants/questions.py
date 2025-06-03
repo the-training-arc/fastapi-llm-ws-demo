@@ -12,3 +12,11 @@ class WellnessProfileQuestions:
 
         You can include as much information as you'd like in your reply. This will help me tailor my follow-up questions and support to you. Thank you!
     """
+
+    USER_ANSWER_RECEIVED = """
+        User Response Received
+    """
+
+    USER_ANSWER_FAILED = """
+        User Response Failed
+    """

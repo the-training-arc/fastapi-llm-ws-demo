@@ -1,6 +1,6 @@
-from typing import Optional
+from typing import Annotated, Optional
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field, StringConstraints
 
 from app.constants.message import MessageEvent, MessageStatus
 
@@ -18,3 +18,11 @@ class TransationResponse(BaseModel):
 
     status: MessageStatus
     message: Optional[str] = None
+
+
+class UserAnswerInput(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+
+    message: Annotated[str, StringConstraints(min_length=1, max_length=1000)] = Field(
+        description='The message to send to the Assistant'
+    )
