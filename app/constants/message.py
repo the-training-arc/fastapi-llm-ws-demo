@@ -6,8 +6,3 @@ class MessageEvent(StrEnum):
     USER_ANSWER = 'USER_ANSWER'
     ASSISTANT_QUESTION = 'ASSISTANT_QUESTION'
     PROFILE_COMPLETE = 'PROFILE_COMPLETE'
-
-
-class MessageStatus(StrEnum):
-    SUCCESS = 'SUCCESS'
-    ERROR = 'ERROR'

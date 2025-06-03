@@ -1,5 +1,6 @@
 import logging
 import os
+from typing import List
 
 import instructor
 from anthropic import AnthropicBedrock
@@ -12,7 +13,7 @@ from app.models.wellness_profile import WellnessProfileResponse
 
 class LLMUsecase:
     def __init__(self):
-        self.aws_region = os.environ.get('AWS_DEFAULT_REGION')
+        self.aws_region = os.environ.get('BEDROCK_REGION')
         self.sonnet_model_id = os.getenv('SONNET_MODEL_ID')
         self.haiku_model_id = os.getenv('HAIKU_MODEL_ID')
         self.max_tokens = os.getenv('MAX_TOKENS') or 4096
@@ -56,41 +57,47 @@ class LLMUsecase:
         return resp
 
     def get_output_model_from_user_response(
-        self, user_response: str, question: str
+        self, user_response: str, question: str, response_history: List[str]
     ) -> WellnessProfileResponse:
         prompt = f"""
-        You are a wellness assistant. Extract wellness profile fields ONLY from information explicitly mentioned in the user's reply. Do NOT infer or guess missing information.
+        ROLE: Wellness profile data extractor and conversation analyzer
 
-        Guidelines for extraction:
-        - age: integer (only if explicitly stated)
-        - gender: male, female, or other (only if explicitly stated)
-        - activityLevel: sedentary, moderate, or active (only if explicitly stated)
-        - dietaryPreference: vegetarian, vegan, keto, paleo, omnivore, or no_preference (only if explicitly stated)
-        - sleepQuality: good, average, or poor (only if explicitly stated)
-        - stressLevel: low, medium, or high (only if explicitly stated)
-        - healthGoals: brief free text (only if explicitly stated)
+        INPUT DATA:
+        - Current user response: "{user_response}"
+        - Current question asked: "{question}"
+        - Complete conversation history: {response_history}
 
-        IMPORTANT: Set fields to null/None if they are NOT explicitly mentioned in the user's response.
-        
-        CONFIDENCE SCORING AND FOLLOW-UP QUESTIONS:
-        1. For every field that IS extracted, assign a confidence score (high, medium, low):
-           - HIGH: Information is explicitly and clearly stated
-           - MEDIUM: Information is mentioned but somewhat ambiguous or unclear
-           - LOW: Information is vague, implied, or uncertain
-        
-        2. MANDATORY: If ANY extracted field has medium or low confidence, you MUST generate a follow-up question that addresses ALL such fields. The follow-up question should:
-           - Specifically ask for clarification on EVERY field with medium/low confidence
-           - Be concise but comprehensive
-           - Use natural language to ask about multiple fields in a single, coherent question
-           - Prioritize the most important unclear information first
-        
-        3. Example follow-up question format when multiple fields need clarification:
-           "I'd like to clarify a few details: [specific question about field 1], and [specific question about field 2]. Also, [question about field 3]?"
-        
-        User response: "{user_response}"
-        Current question: "{question}"
+        TASK 1 - COMPREHENSIVE DATA EXTRACTION:
+        Analyze the ENTIRE conversation history (including current response) to extract information for:
+        • age (integer) • gender (male/female/other) • activityLevel (sedentary/moderate/active)
+        • dietaryPreference (vegetarian/vegan/keto/paleo/omnivore/no_preference)
+        • sleepQuality (good/average/poor) • stressLevel (low/medium/high) • healthGoals (free text)
 
-        Remember: Extract only explicitly mentioned fields, set others to null, and ensure ALL medium/low confidence fields are addressed in your follow-up question.
+        Extract information from ANY point in the conversation, not just the current response.
+        Set unmentioned/unclear fields to null.
+
+        TASK 2 - HISTORICAL COMPLETENESS EVALUATION:
+        Review the complete conversation history and assess:
+        1. Which wellness profile fields have been adequately covered across ALL previous exchanges
+        2. Which fields still need clarification or have never been addressed
+        3. Whether the user has provided sufficient detail for a complete wellness profile
+
+        TASK 3 - INTELLIGENT FOLLOW-UP DECISION:
+        Based on the complete conversation analysis:
+        1. Score each field: HIGH (clearly established), MEDIUM (partially covered), LOW (missing/unclear)
+        2. Consider conversation flow and user engagement level
+        3. If critical fields are still missing OR user responses suggest more context is needed:
+           → Generate ONE thoughtful follow-up question that addresses the most important gaps
+        4. If the wellness profile is sufficiently complete based on conversation history:
+           → Set follow-up question to null
+
+        FOLLOW-UP QUESTION GUIDELINES:
+        - Prioritize missing high-impact fields (age, health goals, activity level)
+        - Reference previous conversation context when appropriate
+        - Ask in a natural, conversational way
+        - Combine multiple missing fields into one coherent question when possible
+
+        OUTPUT: Complete extracted profile + confidence scores + strategic follow-up question (if needed)
         """
         return self.__generate_questions_from_llm(
             prompt=prompt, response_model=WellnessProfileResponse, powerful_model=True

@@ -1,4 +1,4 @@
-from typing import Annotated, List, Optional
+from typing import Annotated, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, StringConstraints
 
@@ -43,15 +43,23 @@ class WellnessProfileConfidence(BaseModel):
     Wellness profile confidence model
     """
 
-    age: Confidence = Field(default=None, description='Confidence of the age')
-    gender: Confidence = Field(default=None, description='Confidence of the gender')
-    activityLevel: Confidence = Field(default=None, description='Confidence of the activity level')
-    dietaryPreference: Confidence = Field(
-        default=None, description='Confidence of the dietary preference'
+    age: Confidence = Field(default=Confidence.LOW, description='Confidence of the age')
+    gender: Confidence = Field(default=Confidence.LOW, description='Confidence of the gender')
+    activityLevel: Confidence = Field(
+        default=Confidence.LOW, description='Confidence of the activity level'
     )
-    sleepQuality: Confidence = Field(default=None, description='Confidence of the sleep quality')
-    stressLevel: Confidence = Field(default=None, description='Confidence of the stress level')
-    healthGoals: Confidence = Field(default=None, description='Confidence of the health goals')
+    dietaryPreference: Confidence = Field(
+        default=Confidence.LOW, description='Confidence of the dietary preference'
+    )
+    sleepQuality: Confidence = Field(
+        default=Confidence.LOW, description='Confidence of the sleep quality'
+    )
+    stressLevel: Confidence = Field(
+        default=Confidence.LOW, description='Confidence of the stress level'
+    )
+    healthGoals: Confidence = Field(
+        default=Confidence.LOW, description='Confidence of the health goals'
+    )
 
 
 class WellnessProfileResponse(BaseModel):
