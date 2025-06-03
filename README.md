@@ -116,7 +116,7 @@ app/
 ### Prerequisites
 
 * Python 3.12+
-* Docker (optional)
+* Docker
 * .env file
 
 
@@ -135,12 +135,35 @@ docker-compose -f docker-compose.prod.yml up --build
 ---
 
 ## API Usage
-
 ### **Hybrid REST + WebSocket Architecture**
 
 This application uses a sophisticated hybrid approach where:
 - **Client → Server**: All communication via REST API (immediate responses)
 - **Server → Client**: All communication via WebSocket (real-time updates)
+
+**Key Benefits:**
+- **Immediate Feedback**: REST endpoints provide instant acknowledgment for all user actions
+- **Real-time Updates**: WebSocket delivers live assistant responses without polling
+- **Reliable Communication**: REST ensures no user input is lost, WebSocket provides seamless real-time experience
+- **Clean Separation**: Clear distinction between user actions (REST) and system responses (WebSocket)
+
+**Architecture Details:**
+* **RESTful API for All Client Actions**: 
+  - Session initialization with instant confirmation
+  - User answer submission with immediate acknowledgment
+  - Better error handling and status reporting
+  - Ensures no user input is lost due to connection issues
+
+* **WebSocket for Real-Time Server Updates**:
+  - Live assistant responses without polling
+  - Natural conversation flow with minimal latency
+  - Real-time profile completion notifications
+  - Efficient unidirectional server-to-client communication
+
+* **Unified State Management**: Both communication methods share the same session state and business logic
+* **Optimal User Experience**: Immediate feedback on actions + real-time conversation flow
+* **Scalability**: REST endpoints can be load-balanced independently of WebSocket connections
+
 
 ```js
 // 1. Initialize session via REST API (immediate response)
@@ -185,29 +208,6 @@ await sendAnswer("I'm 28 years old and I try to exercise 3 times a week");
 5. Repeat steps 3–4 until profile is complete
 6. Server → `PROFILE_COMPLETE` → Client (via WebSocket)
 
-**Key Benefits:**
-- **Immediate Feedback**: REST endpoints provide instant acknowledgment for all user actions
-- **Real-time Updates**: WebSocket delivers live assistant responses without polling
-- **Reliable Communication**: REST ensures no user input is lost, WebSocket provides seamless real-time experience
-- **Clean Separation**: Clear distinction between user actions (REST) and system responses (WebSocket)
-
-### **Hybrid Communication Strategy**
-* **RESTful API for All Client Actions**: 
-  - Session initialization with instant confirmation
-  - User answer submission with immediate acknowledgment
-  - Better error handling and status reporting
-  - Ensures no user input is lost due to connection issues
-
-* **WebSocket for Real-Time Server Updates**:
-  - Live assistant responses without polling
-  - Natural conversation flow with minimal latency
-  - Real-time profile completion notifications
-  - Efficient unidirectional server-to-client communication
-
-* **Unified State Management**: Both communication methods share the same session state and business logic
-* **Optimal User Experience**: Immediate feedback on actions + real-time conversation flow
-* **Scalability**: REST endpoints can be load-balanced independently of WebSocket connections
-
 ---
 
 ## Key Implementation Highlights
@@ -248,25 +248,6 @@ def __merge_wellness_profile(self, existing: WellnessProfile, new: WellnessProfi
 ---
 
 ## Architecture Decisions
-
-### **Hybrid Communication Strategy**
-* **RESTful API for All Client Actions**: 
-  - Session initialization with instant confirmation
-  - User answer submission with immediate acknowledgment
-  - Better error handling and status reporting
-  - Ensures no user input is lost due to connection issues
-
-* **WebSocket for Real-Time Server Updates**:
-  - Live assistant responses without polling
-  - Natural conversation flow with minimal latency
-  - Real-time profile completion notifications
-  - Efficient unidirectional server-to-client communication
-
-* **Unified State Management**: Both communication methods share the same session state and business logic
-* **Optimal User Experience**: Immediate feedback on actions + real-time conversation flow
-* **Scalability**: REST endpoints can be load-balanced independently of WebSocket connections
-
-### **Other Key Decisions**
 * Clean architecture with strict separation of concerns
 * Event-driven design via WebSocket events
 * In-memory state management (for demonstration)
