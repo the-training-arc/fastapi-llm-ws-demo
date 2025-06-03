@@ -17,25 +17,6 @@ services:
       - "8000:80"
     volumes:
       - /app/.venv
-    depends_on:
-      - postgres
     env_file:
       - .env
     platform: linux/amd64
-    networks:
-      - healf-app-network
-
-  postgres:
-    image: postgres:15
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: healf_db
-    volumes:
-      - "./db/postgres_data:/var/lib/postgresql/data:rw"
-    networks:
-      - healf-app-network
-
-networks:
-  healf-app-network:
-    driver: bridge 

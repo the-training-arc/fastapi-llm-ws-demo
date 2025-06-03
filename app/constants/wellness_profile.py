@@ -1,19 +1,19 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class Gender(Enum):
+class Gender(StrEnum):
     MALE = 'male'
     FEMALE = 'female'
     OTHER = 'other'
 
 
-class ActivityLevel(Enum):
+class ActivityLevel(StrEnum):
     SEDENTARY = 'sedentary'
     MODERATE = 'moderate'
     ACTIVE = 'active'
 
 
-class DietaryPreference(Enum):
+class DietaryPreference(StrEnum):
     VEGETARIAN = 'vegetarian'
     VEGAN = 'vegan'
     KETO = 'keto'
@@ -22,13 +22,19 @@ class DietaryPreference(Enum):
     NO_PREFERENCE = 'no_preference'
 
 
-class SleepQuality(Enum):
+class SleepQuality(StrEnum):
     GOOD = 'good'
     AVERAGE = 'average'
     POOR = 'poor'
 
 
-class StressLevel(Enum):
+class StressLevel(StrEnum):
     LOW = 'low'
     MEDIUM = 'medium'
     HIGH = 'high'
+
+
+class Confidence(StrEnum):
+    HIGH = 'high'
+    MEDIUM = 'medium'
+    LOW = 'low'

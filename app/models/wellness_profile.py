@@ -1,9 +1,10 @@
-from typing import Annotated, Optional
+from typing import Annotated, List, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, StringConstraints
 
-from app.models.constants.wellness_profile import (
+from app.constants.wellness_profile import (
     ActivityLevel,
+    Confidence,
     DietaryPreference,
     Gender,
     SleepQuality,
@@ -11,7 +12,7 @@ from app.models.constants.wellness_profile import (
 )
 
 
-class WellnessProfileIn(BaseModel):
+class WellnessProfile(BaseModel):
     """
     Wellness profile input model
     """
@@ -34,4 +35,38 @@ class WellnessProfileIn(BaseModel):
     stressLevel: Optional[StressLevel] = Field(default=None, description='Stress level of the user')
     healthGoals: Optional[Annotated[str, StringConstraints(min_length=1, max_length=100)]] = Field(
         default=None, description='Health goals of the user'
+    )
+
+
+class WellnessProfileConfidence(BaseModel):
+    """
+    Wellness profile confidence model
+    """
+
+    age: Confidence = Field(default=None, description='Confidence of the age')
+    gender: Confidence = Field(default=None, description='Confidence of the gender')
+    activityLevel: Confidence = Field(default=None, description='Confidence of the activity level')
+    dietaryPreference: Confidence = Field(
+        default=None, description='Confidence of the dietary preference'
+    )
+    sleepQuality: Confidence = Field(default=None, description='Confidence of the sleep quality')
+    stressLevel: Confidence = Field(default=None, description='Confidence of the stress level')
+    healthGoals: Confidence = Field(default=None, description='Confidence of the health goals')
+
+
+class WellnessProfileResponse(BaseModel):
+    """
+    Wellness profile measured model
+    """
+
+    model_config = ConfigDict(use_enum_values=True, extra='forbid')
+
+    wellnessProfile: WellnessProfile = Field(
+        default=None, description='Wellness profile of the user'
+    )
+    confidence: WellnessProfileConfidence = Field(
+        default=None, description='Confidence of the wellness profile'
+    )
+    followUpQuestion: Optional[Annotated[str, StringConstraints(min_length=1, max_length=1000)]] = (
+        Field(default=None, description='Follow up question to the user')
     )
