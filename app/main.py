@@ -7,7 +7,7 @@ from fastapi.openapi.docs import (
 )
 from fastapi.responses import HTMLResponse
 
-from app.controllers.ws_controller import ws_controller
+from app.controllers.wellness_profile_controller import ws_controller
 
 app = FastAPI(title='Healf LLM Backend', version='0.1', docs_url=None, redoc_url=None)
 

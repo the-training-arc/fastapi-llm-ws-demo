@@ -15,6 +15,7 @@ from app.repositories.shared_state import (
     session_status,
     session_wellness_confidence,
     session_wellness_profiles,
+    session_has_pending_generation,
 )
 from app.usecases.llm_usecase import LLMUsecase
 
@@ -105,6 +106,27 @@ class WellnessUsecase:
         :param str session_id: The ID of the session
         :param str user_message: The user's message to process
         """
+        max_assistant_replies = 5
+        if session_assistant_replies.get(session_id, 0) >= max_assistant_replies:
+            response = Message(
+                event=MessageEvent.MAX_REPLIES_REACHED,
+                message='You have hit the max number of replies. Please contact support if you need to continue the conversation.',
+            )
+            await self.__manager.send_message_to_all_connections_with_session_id(
+                session_id, response.model_dump_json()
+            )
+            return
+
+        if session_has_pending_generation.get(session_id, False):
+            response = Message(
+                event=MessageEvent.PENDING_GENERATION,
+                message='You have pending generation. Please wait for the response.',
+            )
+            await self.__manager.send_message_to_all_connections_with_session_id(
+                session_id, response.model_dump_json()
+            )
+            return
+
         # Get LLM response
         llm_response = self.__llm_usecase.get_output_model_from_user_response(
             user_message,
@@ -129,13 +151,12 @@ class WellnessUsecase:
         # Update session state
         session_wellness_profiles[session_id] = merged_profile
         session_wellness_confidence[session_id] = merged_confidence
-        max_assistant_replies = 5
 
         if self.__is_profile_complete(merged_profile, merged_confidence):
             # Profile is complete - send completion message
             response = Message(
                 event=MessageEvent.PROFILE_COMPLETE,
-                message=json.dumps(merged_profile.model_dump(), indent=4),
+                message=json.dumps(merged_profile.model_dump()),
             )
             await self.__manager.send_message_to_all_connections_with_session_id(
                 session_id, response.model_dump_json()
@@ -143,16 +164,6 @@ class WellnessUsecase:
 
             self.__logger.info(
                 'Profile complete', session_id=session_id, profile=merged_profile.model_dump()
-            )
-
-        elif session_assistant_replies[session_id] >= max_assistant_replies:
-            # If the assistant has replied 5 times, send a message to the user has hit the max number of replies
-            response = Message(
-                event=MessageEvent.MAX_REPLIES_REACHED,
-                message='You have hit the max number of replies. Please contact support if you need to continue the conversation.',
-            )
-            await self.__manager.send_message_to_all_connections_with_session_id(
-                session_id, response.model_dump_json()
             )
 
         elif self.__has_pending_clarifications(merged_confidence) and llm_response.followUpQuestion:
@@ -164,7 +175,7 @@ class WellnessUsecase:
                 session_id, response.model_dump_json()
             )
 
-            session_assistant_replies[session_id] += 1
+            session_assistant_replies[session_id] = session_assistant_replies.get(session_id, 0) + 1
 
         else:
             self.__logger.warning(

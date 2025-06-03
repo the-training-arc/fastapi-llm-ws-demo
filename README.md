@@ -61,7 +61,7 @@ app/
 
 * **Backend API**: FastAPI with asynchronous endpoints, WebSocket support, and RESTful structure
 * **Hybrid Communication Endpoints**:
-  
+
   **RESTful API:**
   * `POST /profile/initialize/{session_id}` - Initialize session with immediate response
   * `POST /profile/userAnswer/{session_id}` - Submit answers with instant acknowledgment
@@ -135,6 +135,16 @@ docker-compose -f docker-compose.prod.yml up --build
 ---
 
 ## API Usage
+
+### **API Documentation**
+
+Interactive API documentation is available via Swagger UI at:
+**http://127.0.0.1:8000/swagger#/**
+or via redoc
+**http://127.0.0.1:8000/redoc#/**
+
+This provides a complete reference for all REST endpoints with request/response examples and the ability to test endpoints directly from the browser.
+
 ### **Hybrid REST + WebSocket Architecture**
 
 This application uses a sophisticated hybrid approach where:

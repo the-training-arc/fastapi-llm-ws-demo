@@ -8,6 +8,7 @@ session_status: Dict[str, ProfilingStage] = {}
 session_wellness_profiles: Dict[str, WellnessProfile] = {}
 session_wellness_confidence: Dict[str, WellnessProfileConfidence] = {}
 session_assistant_replies: Dict[str, int] = {}
+session_has_pending_generation: Dict[str, bool] = {}
 
 
 def get_connection_manager():
