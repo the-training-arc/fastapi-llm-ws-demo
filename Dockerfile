@@ -5,12 +5,6 @@ ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
-# Install PostgreSQL client
-RUN apt-get update && apt-get install -y \
-    gcc \
-    libpq-dev \
-    && apt-get clean
-
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 COPY pyproject.toml uv.lock ./
