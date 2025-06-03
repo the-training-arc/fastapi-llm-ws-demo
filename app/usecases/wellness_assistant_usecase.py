@@ -11,11 +11,11 @@ from app.models.wellness_profile import WellnessProfile, WellnessProfileConfiden
 from app.repositories.shared_state import (
     get_connection_manager,
     session_assistant_replies,
+    session_has_pending_generation,
     session_messages,
     session_status,
     session_wellness_confidence,
     session_wellness_profiles,
-    session_has_pending_generation,
 )
 from app.usecases.llm_usecase import LLMUsecase
 
@@ -128,11 +128,13 @@ class WellnessUsecase:
             return
 
         # Get LLM response
-        llm_response = self.__llm_usecase.get_output_model_from_user_response(
+        session_has_pending_generation[session_id] = True
+        llm_response = await self.__llm_usecase.get_output_model_from_user_response(
             user_message,
             WellnessProfileQuestions.INTRODUCTION,
             response_history=session_messages[session_id],
         )
+        session_has_pending_generation[session_id] = False
 
         # Get or initialize existing session data
         existing_profile = session_wellness_profiles.get(session_id, WellnessProfile())

@@ -3,7 +3,7 @@ import os
 from typing import List
 
 import instructor
-from anthropic import AnthropicBedrock
+from anthropic import AsyncAnthropicBedrock
 from instructor.utils import disable_pydantic_error_url
 from pydantic import BaseModel
 from structlog import get_logger
@@ -33,7 +33,7 @@ class LLMUsecase:
         logging.basicConfig(level=self.__logging_level)
         self.__logger = get_logger()
 
-    def __generate_questions_from_llm(
+    async def __generate_questions_from_llm(
         self, prompt: str, response_model: BaseModel, powerful_model: bool
     ):
         """
@@ -53,9 +53,9 @@ class LLMUsecase:
             max_tokens=self.__max_tokens,
         )
 
-        model = AnthropicBedrock(aws_region=self.__aws_region)
+        model = AsyncAnthropicBedrock(aws_region=self.__aws_region)
         client = instructor.from_anthropic(model, mode=instructor.Mode.ANTHROPIC_TOOLS)
-        resp, _ = client.chat.completions.create_with_completion(
+        resp, _ = await client.chat.completions.create_with_completion(
             model=model_id,
             max_tokens=self.__max_tokens,
             messages=[
@@ -66,7 +66,7 @@ class LLMUsecase:
         )
         return resp
 
-    def get_output_model_from_user_response(
+    async def get_output_model_from_user_response(
         self, user_response: str, question: str, response_history: List[str]
     ) -> WellnessProfileResponse:
         prompt = f"""
@@ -109,6 +109,6 @@ class LLMUsecase:
 
         OUTPUT: Complete extracted profile + confidence scores + strategic follow-up question (if needed)
         """
-        return self.__generate_questions_from_llm(
+        return await self.__generate_questions_from_llm(
             prompt=prompt, response_model=WellnessProfileResponse, powerful_model=True
         )
