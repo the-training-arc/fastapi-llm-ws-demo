@@ -7,14 +7,14 @@ readme = "README.md"
 requires-python = ">=3.12"
 
 dependencies = [
-    "boto3==1.38.27",
+    "boto3==1.38.36",
     "fastapi[standard]==0.115.12",
     "instructor==1.8.3",
     "websockets==15.0.1",
-    "anthropic[bedrock]==0.42.0",
-    "pydantic==2.10",
-    "pydantic-core==2.27.0",
-    "structlog==25.3.0",
+    "anthropic[bedrock]==0.54.0",
+    "pydantic==2.11.7",
+    "pydantic-core==2.35.1",
+    "structlog==25.4.0",
 ]
 
 [dependency-groups]
