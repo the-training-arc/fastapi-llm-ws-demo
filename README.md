@@ -65,7 +65,7 @@ app/
   **RESTful API:**
   * `POST /profile/initialize/{session_id}` - Initialize session with immediate response
   * `POST /profile/userAnswer/{session_id}` - Submit answers with instant acknowledgment
-  
+
   **WebSocket:**
   * `WebSocket /ws/wellnessProfile/{session_id}` – Real-time profiling conversation
   * Supports: `INIT_PROFILE`, `USER_ANSWER`, `ASSISTANT_QUESTION`, `PROFILE_COMPLETE`, `MAX_REPLIES_REACHED`
@@ -158,7 +158,7 @@ This application uses a sophisticated hybrid approach where:
 - **Clean Separation**: Clear distinction between user actions (REST) and system responses (WebSocket)
 
 **Architecture Details:**
-* **RESTful API for All Client Actions**: 
+* **RESTful API for All Client Actions**:
   - Session initialization with instant confirmation
   - User answer submission with immediate acknowledgment
   - Better error handling and status reporting

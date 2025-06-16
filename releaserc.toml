@@ -1,0 +1,11 @@
+[project]
+name = "fastapi-llm-ws"
+version = "0.0.1"
+description = "FastAPI LLM Websocket Backend"
+
+[tool.semantic_release]
+version_toml = ["releaserc.toml"]
+version_variable = [
+    "__init__.py:__version__"
+]
+branch = "main"
