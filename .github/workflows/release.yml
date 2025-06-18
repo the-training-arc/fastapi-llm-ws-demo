@@ -20,6 +20,7 @@ jobs:
         contents: 'write'
         packages: 'write'
         actions: 'read'
+        id-token: 'write'
 
     steps:
       - name: Setup | Create GitHub App Token
