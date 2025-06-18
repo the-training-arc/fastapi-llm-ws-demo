@@ -98,13 +98,13 @@ jobs:
           aws ecr get-login-password --region ${{ vars.AWS_REGION }} | docker login --username AWS --password-stdin ${AWS_ECR_REPO_URL}
           
           DOCKER_BUILDKIT=1 docker build \
-            --cache-from ${{ vars.AWS_ECR_REPO_URL }}:latest \
+            --cache-from ${AWS_ECR_REPO_URL}:latest \
             --build-arg BUILDKIT_INLINE_CACHE=1 \
-            -t ${{ vars.AWS_ECR_REPO_URL }}:${{ steps.release.outputs.tag }} \
-            -t ${{ vars.AWS_ECR_REPO_URL }}:latest \
+            -t ${AWS_ECR_REPO_URL}:${{ steps.release.outputs.tag }} \
+            -t ${AWS_ECR_REPO_URL}:latest \
             .
             
-          docker push --all-tags ${{ vars.AWS_ECR_REPO_URL }}
+          docker push --all-tags ${AWS_ECR_REPO_URL}
 
       - name: Publish | Upload to GitHub Release Assets
         uses: python-semantic-release/publish-action@v10.0.2
