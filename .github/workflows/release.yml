@@ -90,6 +90,9 @@ jobs:
 
       - name: Push to ECR
         run: |
+          export AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query 'Account' --output text)
+          export REPO_NAME="fast-infra-dev"
+          export AWS_ECR_REPO_URL="${AWS_ACCOUNT_ID}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/${REPO_NAME}"
           docker build -t ${{ vars.AWS_ECR_REPO_URL }}:${{ steps.release.outputs.tag }} .
           docker push ${{ vars.AWS_ECR_REPO_URL }}:${{ steps.release.outputs.tag }}
           docker tag ${{ vars.AWS_ECR_REPO_URL }}:${{ steps.release.outputs.tag }} ${{ vars.AWS_ECR_REPO_URL }}:latest
