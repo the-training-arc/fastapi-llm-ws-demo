@@ -2,7 +2,7 @@ name: Semantic Release
 
 on:
   workflow_run:
-    workflows: ["Formatting and Linting", "Security"]
+    workflows: ["Formatting, Linting and Testing"]
     types:
       - completed
     branches:

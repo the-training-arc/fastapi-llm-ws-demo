@@ -1,4 +1,4 @@
-name: Security
+name: Formatting, Linting and Testing
 
 on:
   push:
@@ -10,7 +10,25 @@ on:
 
 jobs:
   #----------------------------------------------
-  #       Security
+  #       Formatting and Linting
+  #----------------------------------------------
+  format-check:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+         python-version: '3.12'
+
+      - uses: astral-sh/ruff-action@v3
+      - run: ruff check --fix
+      - run: ruff format
+
+  #----------------------------------------------
+  #       Snyk
   #----------------------------------------------
   security:
     runs-on: ubuntu-latest
