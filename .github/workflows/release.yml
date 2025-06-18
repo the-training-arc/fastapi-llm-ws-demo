@@ -94,10 +94,17 @@ jobs:
           export AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query 'Account' --output text)
           export REPO_NAME="fast-infra-dev"
           export AWS_ECR_REPO_URL="${AWS_ACCOUNT_ID}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/${REPO_NAME}"
-          docker build -t ${{ vars.AWS_ECR_REPO_URL }}:${{ steps.release.outputs.tag }} .
-          docker push ${{ vars.AWS_ECR_REPO_URL }}:${{ steps.release.outputs.tag }}
-          docker tag ${{ vars.AWS_ECR_REPO_URL }}:${{ steps.release.outputs.tag }} ${{ vars.AWS_ECR_REPO_URL }}:latest
-          docker push ${{ vars.AWS_ECR_REPO_URL }}:latest
+
+          aws ecr get-login-password --region ${{ vars.AWS_REGION }} | docker login --username AWS --password-stdin ${AWS_ECR_REPO_URL}
+          
+          DOCKER_BUILDKIT=1 docker build \
+            --cache-from ${{ vars.AWS_ECR_REPO_URL }}:latest \
+            --build-arg BUILDKIT_INLINE_CACHE=1 \
+            -t ${{ vars.AWS_ECR_REPO_URL }}:${{ steps.release.outputs.tag }} \
+            -t ${{ vars.AWS_ECR_REPO_URL }}:latest \
+            .
+            
+          docker push --all-tags ${{ vars.AWS_ECR_REPO_URL }}
 
       - name: Publish | Upload to GitHub Release Assets
         uses: python-semantic-release/publish-action@v10.0.2
