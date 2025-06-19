@@ -28,12 +28,17 @@ jobs:
                   role-to-assume: ${{ vars.AWS_ROLE_TO_ASSUME }}
                   role-session-name: github-actions-${{ github.ref_name }}
 
+            - name: Setup Python 3.12
+              uses: actions/setup-python@v5
+              with:
+                  python-version: "3.12"
+
             # Get the semantic version and build ECR image URL
             - name: Get semantic version and build image URL
               id: image-url
               run: |
                   # Install semantic-release
-                  pip install python-semantic-release==10.0.2
+                  pip install python-semantic-release==10.1.0
 
                   # Get the latest released version
                   if SEMANTIC_VERSION=$(semantic-release version --print-last-released 2>/dev/null) && [ -n "$SEMANTIC_VERSION" ]; then
@@ -97,7 +102,11 @@ jobs:
                   role-to-assume: ${{ vars.AWS_ROLE_TO_ASSUME }}
                   role-session-name: github-actions-${{ github.ref_name }}
 
-            # Get the semantic version and build ECR image URL
+            - name: Setup Python 3.12
+              uses: actions/setup-python@v5
+              with:
+                  python-version: "3.12"
+
             - name: Get semantic version and build image URL
               id: image-url
               run: |

@@ -97,7 +97,7 @@ jobs:
                     -t ${AWS_ECR_REPO_URL}:${{ steps.release.outputs.tag }} \
                     -t ${AWS_ECR_REPO_URL}:latest \
                     .
-                    
+
                   docker push --all-tags ${AWS_ECR_REPO_URL}
 
                   DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' ${AWS_ECR_REPO_URL}:${{ steps.release.outputs.tag }})
