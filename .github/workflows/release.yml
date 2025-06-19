@@ -1,112 +1,112 @@
 name: Semantic Release
 
 on:
-  workflow_run:
-    workflows: ["Formatting, Linting and Testing"]
-    types:
-      - completed
-    branches:
-      - main
+    workflow_run:
+        workflows: ["Formatting, Linting and Testing"]
+        types:
+            - completed
+        branches:
+            - main
 
 jobs:
-  release:
-    runs-on: ubuntu-latest
-    if: |
-      github.event.workflow_run.conclusion == 'success' &&
-      github.event.workflow_run.head_sha == github.sha
-    
-    concurrency:
-      group: ${{ github.workflow }}-release-${{ github.ref_name }}
-      cancel-in-progress: false
+    release:
+        runs-on: ubuntu-latest
+        if: |
+            github.event.workflow_run.conclusion == 'success' &&
+            github.event.workflow_run.head_sha == github.sha
 
-    permissions:
-        contents: 'write'
-        packages: 'write'
-        actions: 'read'
-        id-token: 'write'
+        concurrency:
+            group: ${{ github.workflow }}-release-${{ github.ref_name }}
+            cancel-in-progress: false
 
-    outputs:
-      image_digest: ${{ steps.push-to-ecr.outputs.digest }}
+        permissions:
+            contents: "write"
+            packages: "write"
+            actions: "read"
+            id-token: "write"
 
-    steps:
-      - name: Setup | Create GitHub App Token
-        uses: actions/create-github-app-token@v1
-        id: app-token
-        with:
-          app-id: ${{ vars.VERSION_BUMPER_APPID }}
-          private-key: ${{ secrets.VERSION_BUMPER_SECRET }}
+        outputs:
+            image_digest: ${{ steps.push-to-ecr.outputs.digest }}
 
-      - name: Setup | Checkout Repository
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.ref_name }}
-          fetch-depth: 0
-          token: ${{ steps.app-token.outputs.token }}
+        steps:
+            - name: Setup | Create GitHub App Token
+              uses: actions/create-github-app-token@v1
+              id: app-token
+              with:
+                  app-id: ${{ vars.VERSION_BUMPER_APPID }}
+                  private-key: ${{ secrets.VERSION_BUMPER_SECRET }}
 
-      - name: Evaluate | Verify upstream has NOT changed
-        shell: bash
-        run: |
-          set -euo pipefail
-          
-          git fetch origin main
-          HEAD_SHA="$(git rev-parse HEAD)"
-          MAIN_SHA="$(git rev-parse origin/main)"
-          
-          if [ "$HEAD_SHA" != "$MAIN_SHA" ]; then
-            echo "::error::Upstream has changed! HEAD($HEAD_SHA) != MAIN($MAIN_SHA)"
-            exit 1
-          fi
-          
-          echo "Verified upstream branch has not changed, continuing with release..."
+            - name: Setup | Checkout Repository
+              uses: actions/checkout@v4
+              with:
+                  ref: ${{ github.ref_name }}
+                  fetch-depth: 0
+                  token: ${{ steps.app-token.outputs.token }}
 
-      - name: Action | Semantic Version Release
-        id: release
-        uses: python-semantic-release/python-semantic-release@v10.0.2
-        env:
-          DEBUG: semantic_release.*
-        with:
-          github_token: ${{ steps.app-token.outputs.token }}
-          git_committer_name: "github-actions"
-          git_committer_email: "github-actions@github.com"
+            - name: Evaluate | Verify upstream has NOT changed
+              shell: bash
+              run: |
+                  set -euo pipefail
 
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: ${{ vars.AWS_ROLE_TO_ASSUME }}
-          role-session-name: github-actions-${{ github.ref_name }}
+                  git fetch origin main
+                  HEAD_SHA="$(git rev-parse HEAD)"
+                  MAIN_SHA="$(git rev-parse origin/main)"
 
-      - name: Push to ECR
-        id: push-to-ecr
-        if: steps.release.outputs.released == 'true' && steps.release.outputs.tag != ''
-        env:
-          REPO_NAME: "fast-infra"
-        run: |
-          set -euo pipefail
-          
-          AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query 'Account' --output text)
-          AWS_ECR_REPO_URL="${AWS_ACCOUNT_ID}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/${REPO_NAME}"
-          
-          aws ecr get-login-password --region ${{ vars.AWS_REGION }} | docker login --username AWS --password-stdin ${AWS_ECR_REPO_URL}
-          
-          docker pull ${AWS_ECR_REPO_URL}:latest || true
-          
-          DOCKER_BUILDKIT=1 docker build \
-            --cache-from ${AWS_ECR_REPO_URL}:latest \
-            --build-arg BUILDKIT_INLINE_CACHE=1 \
-            -t ${AWS_ECR_REPO_URL}:${{ steps.release.outputs.tag }} \
-            -t ${AWS_ECR_REPO_URL}:latest \
-            .
-            
-          docker push --all-tags ${AWS_ECR_REPO_URL}
-          
-          DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' ${AWS_ECR_REPO_URL}:${{ steps.release.outputs.tag }})
-          echo "Image Digest: $DIGEST"
-          echo "digest=$DIGEST" >> $GITHUB_OUTPUT
+                  if [ "$HEAD_SHA" != "$MAIN_SHA" ]; then
+                    echo "::error::Upstream has changed! HEAD($HEAD_SHA) != MAIN($MAIN_SHA)"
+                    exit 1
+                  fi
 
-      - name: Publish | Upload to GitHub Release Assets
-        if: steps.release.outputs.released == 'true' && steps.release.outputs.tag != ''
-        uses: python-semantic-release/publish-action@v10.0.2
-        with:
-          github_token: ${{ steps.app-token.outputs.token }}
-          tag: ${{ steps.release.outputs.tag }}
+                  echo "Verified upstream branch has not changed, continuing with release..."
+
+            - name: Action | Semantic Version Release
+              id: release
+              uses: python-semantic-release/python-semantic-release@v10.0.2
+              env:
+                  DEBUG: semantic_release.*
+              with:
+                  github_token: ${{ steps.app-token.outputs.token }}
+                  git_committer_name: "github-actions"
+                  git_committer_email: "github-actions@github.com"
+
+            - name: Configure AWS Credentials
+              uses: aws-actions/configure-aws-credentials@v4
+              with:
+                  aws-region: ${{ vars.AWS_REGION }}
+                  role-to-assume: ${{ vars.AWS_ROLE_TO_ASSUME }}
+                  role-session-name: github-actions-${{ github.ref_name }}
+
+            - name: Push to ECR
+              id: push-to-ecr
+              if: steps.release.outputs.released == 'true' && steps.release.outputs.tag != ''
+              env:
+                  REPO_NAME: "fast-infra"
+              run: |
+                  set -euo pipefail
+
+                  AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query 'Account' --output text)
+                  AWS_ECR_REPO_URL="${AWS_ACCOUNT_ID}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/${REPO_NAME}"
+
+                  aws ecr get-login-password --region ${{ vars.AWS_REGION }} | docker login --username AWS --password-stdin ${AWS_ECR_REPO_URL}
+
+                  docker pull ${AWS_ECR_REPO_URL}:latest || true
+
+                  DOCKER_BUILDKIT=1 docker build \
+                    --cache-from ${AWS_ECR_REPO_URL}:latest \
+                    --build-arg BUILDKIT_INLINE_CACHE=1 \
+                    -t ${AWS_ECR_REPO_URL}:${{ steps.release.outputs.tag }} \
+                    -t ${AWS_ECR_REPO_URL}:latest \
+                    .
+                    
+                  docker push --all-tags ${AWS_ECR_REPO_URL}
+
+                  DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' ${AWS_ECR_REPO_URL}:${{ steps.release.outputs.tag }})
+                  echo "Image Digest: $DIGEST"
+                  echo "digest=$DIGEST" >> $GITHUB_OUTPUT
+
+            - name: Publish | Upload to GitHub Release Assets
+              if: steps.release.outputs.released == 'true' && steps.release.outputs.tag != ''
+              uses: python-semantic-release/publish-action@v10.0.2
+              with:
+                  github_token: ${{ steps.app-token.outputs.token }}
+                  tag: ${{ steps.release.outputs.tag }}
