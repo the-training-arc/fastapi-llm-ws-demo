@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.2.0 (2025-06-19)
+
+### Features
+
+- Add new deployment workflows for development and production environments in GitHub Actions
+  ([`388c4b3`](https://github.com/the-training-arc/fastapi-llm-ws-demo/commit/388c4b39aaa13fb1d090f8cf32a1860cfefd0c72))
+
+
 ## v1.1.0 (2025-06-19)
 
 ### Chores
