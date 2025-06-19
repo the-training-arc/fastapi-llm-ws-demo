@@ -53,7 +53,7 @@ jobs:
                   # Build ECR image URL
                   AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query 'Account' --output text)
                   REPO_NAME="fast-infra"
-                  ECR_IMAGE_URL="${AWS_ACCOUNT_ID}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/${REPO_NAME}:${SEMANTIC_VERSION}"
+                  ECR_IMAGE_URL="${AWS_ACCOUNT_ID}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/${REPO_NAME}:v${SEMANTIC_VERSION}"
 
                   echo "version=$SEMANTIC_VERSION" >> $GITHUB_OUTPUT
                   echo "image_url=$ECR_IMAGE_URL" >> $GITHUB_OUTPUT
@@ -128,7 +128,7 @@ jobs:
                   # Build ECR image URL
                   AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query 'Account' --output text)
                   REPO_NAME="fast-infra"
-                  ECR_IMAGE_URL="${AWS_ACCOUNT_ID}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/${REPO_NAME}:${SEMANTIC_VERSION}"
+                  ECR_IMAGE_URL="${AWS_ACCOUNT_ID}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/${REPO_NAME}:v${SEMANTIC_VERSION}"
 
                   echo "version=$SEMANTIC_VERSION" >> $GITHUB_OUTPUT
                   echo "image_url=$ECR_IMAGE_URL" >> $GITHUB_OUTPUT
