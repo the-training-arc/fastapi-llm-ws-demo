@@ -52,6 +52,12 @@ jobs:
                   echo "image_url=$ECR_IMAGE_URL" >> $GITHUB_OUTPUT
                   echo "Built ECR image URL: $ECR_IMAGE_URL"
 
+            - name: Download task definition
+              run: |
+                  aws ecs describe-task-definition \
+                    --task-definition fast-infra-dev-rest-ws \
+                    --query taskDefinition > task-definition.json
+
             - name: Fill in the new image ID in the Amazon ECS task definition
               id: task-def
               uses: aws-actions/amazon-ecs-render-task-definition@v1
@@ -63,7 +69,7 @@ jobs:
             - name: Deploy Task Definition
               uses: aws-actions/amazon-ecs-deploy-task-definition@v2
               with:
-                  task-definition: task-definition.json
+                  task-definition: ${{ steps.task-def.outputs.task-definition }}
                   service: fast-infra-dev-rest-ws-service
                   cluster: fast-infra-dev
                   wait-for-service-stability: true
@@ -115,6 +121,12 @@ jobs:
                   echo "image_url=$ECR_IMAGE_URL" >> $GITHUB_OUTPUT
                   echo "Built ECR image URL: $ECR_IMAGE_URL"
 
+            - name: Download task definition
+              run: |
+                  aws ecs describe-task-definition \
+                    --task-definition fast-infra-dev-rest-ws \
+                    --query taskDefinition > task-definition.json
+
             - name: Fill in the new image ID in the Amazon ECS task definition
               id: task-def
               uses: aws-actions/amazon-ecs-render-task-definition@v1
@@ -126,7 +138,7 @@ jobs:
             - name: Deploy Task Definition
               uses: aws-actions/amazon-ecs-deploy-task-definition@v2
               with:
-                  task-definition: task-definition.json
+                  task-definition: ${{ steps.task-def.outputs.task-definition }}
                   service: fast-infra-dev-rest-ws-service
                   cluster: fast-infra-dev
                   wait-for-service-stability: true
