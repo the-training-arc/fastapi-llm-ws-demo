@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.2.1 (2025-06-19)
+
+### Bug Fixes
+
+- Correct branch pattern in deployment workflow from 'releases/**' to 'release/**'
+  ([`c4bbc15`](https://github.com/the-training-arc/fastapi-llm-ws-demo/commit/c4bbc153453a31f441f8bc054c7e5e08cb4e14ba))
+
+
 ## v1.2.0 (2025-06-19)
 
 ### Features
