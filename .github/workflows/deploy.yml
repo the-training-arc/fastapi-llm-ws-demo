@@ -1,0 +1,83 @@
+name: Deploy Fast Infra
+on:
+  push:
+    branches:
+      - 'releases/**'
+
+jobs:
+  deploy-dev:
+    if: startsWith(github.event.workflow_run.head_branch, 'release/')
+    runs-on: ubuntu-latest
+    environment:
+      name: dev
+
+    permissions:
+        contents: 'write'
+        packages: 'write'
+        actions: 'read'
+        id-token: 'write'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: ${{ vars.AWS_ROLE_TO_ASSUME }}
+          role-session-name: github-actions-${{ github.ref_name }}
+
+      - name: Fill in the new image ID in the Amazon ECS task definition
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+            task-definition: task-definition.json
+            container-name: fast-infra-dev-rest-ws
+            image: ${{ github.event.workflow_run.outputs.image_digest }}
+
+      - name: Deploy Task Definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+            task-definition: task-definition.json
+            service: fast-infra-dev-rest-ws-service
+            cluster: fast-infra-dev
+            wait-for-service-stability: true
+  
+  deploy-prod:
+    if: startsWith(github.event.workflow_run.head_branch, 'release/')
+    runs-on: ubuntu-latest
+    needs: deploy-dev
+    environment:
+      name: prod
+
+    permissions:
+      contents: 'write'
+      packages: 'write'
+      actions: 'read'
+      id-token: 'write'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: ${{ vars.AWS_ROLE_TO_ASSUME }}
+          role-session-name: github-actions-${{ github.ref_name }}
+
+      - name: Fill in the new image ID in the Amazon ECS task definition
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+            task-definition: task-definition.json
+            container-name: fast-infra-dev-rest-ws
+            image: ${{ github.event.workflow_run.outputs.image_digest }}
+
+      - name: Deploy Task Definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+            task-definition: task-definition.json
+            service: fast-infra-dev-rest-ws-service
+            cluster: fast-infra-dev
+            wait-for-service-stability: true
