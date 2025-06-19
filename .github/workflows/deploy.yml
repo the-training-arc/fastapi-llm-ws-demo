@@ -2,7 +2,7 @@ name: Deploy Fast Infra
 on:
   push:
     branches:
-      - 'releases/**'
+      - 'release/**'
 
 jobs:
   deploy-dev:
