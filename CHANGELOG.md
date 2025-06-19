@@ -2,6 +2,41 @@
 
 <!-- version list -->
 
+## v1.3.0 (2025-06-19)
+
+### Chores
+
+- Update FastAPI version to 1.2.1 in main application file
+  ([`4fac1af`](https://github.com/the-training-arc/fastapi-llm-ws-demo/commit/4fac1af28e9dd9f40b79f2e4f81735595cbc9fa1))
+
+### Continuous Integration
+
+- Add task definition download step in GitHub Actions workflow for ECS deployment
+  ([`8195167`](https://github.com/the-training-arc/fastapi-llm-ws-demo/commit/8195167961a2f51afb43c48129529a4baf262956))
+
+- Enhance GitHub Actions workflow to retrieve semantic version and build ECR image URL dynamically
+  ([`92420fb`](https://github.com/the-training-arc/fastapi-llm-ws-demo/commit/92420fb1c26e7524a4d8b0634ea0d33454493697))
+
+- Refactor GitHub Actions workflows for improved readability and consistency in formatting and
+  indentation
+  ([`c2e7314`](https://github.com/the-training-arc/fastapi-llm-ws-demo/commit/c2e73146046ef7a8647fca3026ff7d4bc324583c))
+
+- Set fetch-depth to 0 in GitHub Actions workflows for full history checkout
+  ([`40acb83`](https://github.com/the-training-arc/fastapi-llm-ws-demo/commit/40acb83aa8dc548733babd2636afa543c4c57e9d))
+
+- Update deployment conditions in GitHub Actions to trigger on successful main branch workflow runs
+  ([`deead8c`](https://github.com/the-training-arc/fastapi-llm-ws-demo/commit/deead8c562f7dd4c74ebe5b1bbae1a8286f73bb0))
+
+- Update Python version to 3.12 and upgrade python-semantic-release to 10.1.0 in GitHub Actions
+  workflows
+  ([`8ff885a`](https://github.com/the-training-arc/fastapi-llm-ws-demo/commit/8ff885a3b05eafac60b9be2d36c553f12ba09a6e))
+
+### Features
+
+- Update FastAPI application title and modify wellness profile route tag for clarity
+  ([`a2a92f4`](https://github.com/the-training-arc/fastapi-llm-ws-demo/commit/a2a92f4a0b82370006dc3c727d76a1a98ca4dd82))
+
+
 ## v1.2.1 (2025-06-19)
 
 ### Bug Fixes
