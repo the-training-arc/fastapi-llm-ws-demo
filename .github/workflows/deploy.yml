@@ -28,13 +28,37 @@ jobs:
                   role-to-assume: ${{ vars.AWS_ROLE_TO_ASSUME }}
                   role-session-name: github-actions-${{ github.ref_name }}
 
+            # Get the semantic version and build ECR image URL
+            - name: Get semantic version and build image URL
+              id: image-url
+              run: |
+                  # Install semantic-release
+                  pip install python-semantic-release==10.0.2
+
+                  # Get the latest released version
+                  if SEMANTIC_VERSION=$(semantic-release version --print-last-released 2>/dev/null) && [ -n "$SEMANTIC_VERSION" ]; then
+                    echo "Found released version: $SEMANTIC_VERSION"
+                  else
+                    SEMANTIC_VERSION="0.0.1"
+                    echo "No releases found, using fallback: $SEMANTIC_VERSION"
+                  fi
+
+                  # Build ECR image URL
+                  AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query 'Account' --output text)
+                  REPO_NAME="fast-infra"
+                  ECR_IMAGE_URL="${AWS_ACCOUNT_ID}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/${REPO_NAME}:${SEMANTIC_VERSION}"
+
+                  echo "version=$SEMANTIC_VERSION" >> $GITHUB_OUTPUT
+                  echo "image_url=$ECR_IMAGE_URL" >> $GITHUB_OUTPUT
+                  echo "Built ECR image URL: $ECR_IMAGE_URL"
+
             - name: Fill in the new image ID in the Amazon ECS task definition
               id: task-def
               uses: aws-actions/amazon-ecs-render-task-definition@v1
               with:
                   task-definition: task-definition.json
                   container-name: fast-infra-dev-rest-ws
-                  image: ${{ github.event.workflow_run.outputs.image_digest }}
+                  image: ${{ steps.image-url.outputs.image_url }}
 
             - name: Deploy Task Definition
               uses: aws-actions/amazon-ecs-deploy-task-definition@v2
@@ -67,13 +91,37 @@ jobs:
                   role-to-assume: ${{ vars.AWS_ROLE_TO_ASSUME }}
                   role-session-name: github-actions-${{ github.ref_name }}
 
+            # Get the semantic version and build ECR image URL
+            - name: Get semantic version and build image URL
+              id: image-url
+              run: |
+                  # Install semantic-release
+                  pip install python-semantic-release==10.0.2
+
+                  # Get the latest released version
+                  if SEMANTIC_VERSION=$(semantic-release version --print-last-released 2>/dev/null) && [ -n "$SEMANTIC_VERSION" ]; then
+                    echo "Found released version: $SEMANTIC_VERSION"
+                  else
+                    SEMANTIC_VERSION="0.0.1"
+                    echo "No releases found, using fallback: $SEMANTIC_VERSION"
+                  fi
+
+                  # Build ECR image URL
+                  AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query 'Account' --output text)
+                  REPO_NAME="fast-infra"
+                  ECR_IMAGE_URL="${AWS_ACCOUNT_ID}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/${REPO_NAME}:${SEMANTIC_VERSION}"
+
+                  echo "version=$SEMANTIC_VERSION" >> $GITHUB_OUTPUT
+                  echo "image_url=$ECR_IMAGE_URL" >> $GITHUB_OUTPUT
+                  echo "Built ECR image URL: $ECR_IMAGE_URL"
+
             - name: Fill in the new image ID in the Amazon ECS task definition
               id: task-def
               uses: aws-actions/amazon-ecs-render-task-definition@v1
               with:
                   task-definition: task-definition.json
                   container-name: fast-infra-dev-rest-ws
-                  image: ${{ github.event.workflow_run.outputs.image_digest }}
+                  image: ${{ steps.image-url.outputs.image_url }}
 
             - name: Deploy Task Definition
               uses: aws-actions/amazon-ecs-deploy-task-definition@v2
